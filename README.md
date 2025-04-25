@@ -8,6 +8,13 @@ Again, this is not intendent for production use. I personally only use it to get
 
 ---
 
+## Example
+
+The merged output when running Godot2pUML against a demo project: [Moddable Platformer](https://godotengine.org/asset-library/asset/3371)
+
+![Class Diagram](example_img_a.png)
+
+
 ## What It Does
 
 Godot2pUML parses your `.gd` files and extracts:
