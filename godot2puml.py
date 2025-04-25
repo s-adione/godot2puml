@@ -90,6 +90,12 @@ class Godot2PUML:
                 args.append((arg, None))
         return args
 
+
+    def _type_mentions_class(self, type_str, class_name):
+        if not type_str:
+            return False
+        return re.search(rf'\b{re.escape(class_name)}\b', type_str) is not None
+
     def generate_plantuml(self):
         """
         Generates a PlantUML class diagram based on the parsed class information
@@ -163,20 +169,26 @@ class Godot2PUML:
 
         # Check properties
         for var, var_type in self.class_info.get('properties', []):
-            if var_type in self.class_names:
-                associations.add(var_type)
+            if not var_type:
+                continue
+            for known_class in self.class_names:
+                if self._type_mentions_class(var_type, known_class):
+                    associations.add(known_class)
 
         # Check method parameters
         for method in self.class_info.get('methods', []):
-            for param_name, param_type in method.get('args', []):
-                if param_type in self.class_names:
-                    associations.add(param_type)
+            for param_name, param_type in method.get('args', []):  # not 'args'
+                for known_class in self.class_names:
+                    if self._type_mentions_class(param_type, known_class):
+                        associations.add(known_class)
 
         # Check signal arguments
         for signal in self.class_info.get('signals', []):
             for arg_name, arg_type in signal.get('args', []):
-                if arg_type in self.class_names:
-                    associations.add(arg_type)
+                for known_class in self.class_names:
+                    if self._type_mentions_class(arg_type, known_class):
+                        associations.add(known_class)
+
 
         # Generate UML lines
         return [

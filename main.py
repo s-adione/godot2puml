@@ -1,5 +1,7 @@
 import os
 import argparse
+import shutil
+
 from project_godot2puml import ProjectGodot2PUML
 
 if __name__ == "__main__":
@@ -12,6 +14,8 @@ if __name__ == "__main__":
         parser.print_help()
         exit(1)
 
+    if os.path.exists(args.output_directory):
+        shutil.rmtree(args.output_directory)
     os.makedirs(args.output_directory, exist_ok=True)
 
     project_Godot2pUML = ProjectGodot2PUML(args.godot_project_directory, args.output_directory)
