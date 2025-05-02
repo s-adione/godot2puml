@@ -7,6 +7,7 @@ class Godot2PUML:
         self.filename = filename
         self.class_names = class_names
         self.class_info = {
+            'namespace': None,
             'extends': None,
             'class_name': None,
             'signals': [],
@@ -20,11 +21,18 @@ class Godot2PUML:
         """
         Main entry point to parse class metadata from a Godot script.
         """
+        self._parse_namespace()
         self._parse_extends()
         self._parse_class_name()
         self._parse_signals()
         self._parse_methods()
         self._parse_properties()
+
+    def _parse_namespace(self):
+        namespace_pattern = r'^###\s*namespace\s+(\w+)'
+        match = re.match(namespace_pattern, self.godot_script)
+        if match:
+            self.class_info['namespace'] = match.group(1)
 
     def _parse_extends(self):
         extends_pattern = r'extends (\w+)'
@@ -107,7 +115,14 @@ class Godot2PUML:
             sanitized_name = re.sub(r'\W+', '_', self.filename)  # \W matches anything not [a-zA-Z0-9_]
             class_name = '__GD__' + sanitized_name
 
+        namespace = self.class_info.get("namespace")
+        if namespace:
+            uml.append(f'package "{namespace}" #DDDDDD {{')
+
         uml.append(self._generate_class_block(class_name))
+
+        if namespace:
+            uml.append("}")
 
         if self.class_info.get('extends'):
             uml.append(self._generate_inheritance(class_name))
